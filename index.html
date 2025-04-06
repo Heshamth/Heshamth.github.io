@@ -137,6 +137,7 @@
         tilt: 0.034,
         rotation: 0.003,
         texture: "mercury.jpg",
+        orbitColor: 0xBBBBBB, // Light gray for Mercury
         info: "القطر: 4,879 كيلومتر\nالكتلة: 3.3 × 10²³ كيلوغرام\nالمدار: 88 يومًا\nدرجة حرارة السطح: من -173°C إلى 427°C\nلا يحتوي على غلاف جوي\nأصغر كواكب المجموعة الشمسية، كوكب صخري مليء بالفوهات"
       }, {
         name: "الزهرة",
@@ -146,6 +147,7 @@
         tilt: 177.4,
         rotation: 0.0004,
         texture: "venus.jpg",
+        orbitColor: 0xFFD700, // Gold for Venus
         info: "القطر: 12,104 كيلومتر\nالكتلة: 4.87 × 10²⁴ كيلوغرام\nالمدار: 225 يومًا\nدرجة حرارة السطح: 464°C\nغلاف جوي كثيف من ثاني أكسيد الكربون\nأسخن كواكب المجموعة الشمسية، يدور بعكس اتجاه الدوران المعتاد (حركة تراجعية)"
       }, {
         name: "الأرض",
@@ -155,6 +157,7 @@
         tilt: 23.5,
         rotation: 0.05,
         texture: "earth.jpg",
+        orbitColor: 0x1E90FF, // Dodger blue for Earth
         info: "القطر: 12,742 كيلومتر\nالكتلة: 5.97 × 10²⁴ كيلوغرام\nالمدار: 365.25 يومًا\nدرجة حرارة السطح: من -88°C إلى 58°C\nمغطاة بنسبة 71% بالمياه\nالكوكب الوحيد المعروف بوجود الحياة، وله قمر واحد"
       }, {
         name: "المريخ",
@@ -164,6 +167,7 @@
         tilt: 25.2,
         rotation: 0.048,
         texture: "mars.jpg",
+        orbitColor: 0xFF4500, // Orange red for Mars
         info: "القطر: 6,792 كيلومتر\nالكتلة: 6.42 × 10²³ كيلوغرام\nالمدار: 687 يومًا\nدرجة حرارة السطح: من -153°C إلى 20°C\nغلاف جوي رقيق من ثاني أكسيد الكربون\nيظهر باللون الأحمر بسبب أكسيد الحديد، وله قمران"
       }, {
         name: "المشتري",
@@ -173,6 +177,7 @@
         tilt: 3.1,
         rotation: 0.1,
         texture: "jupiter.jpg",
+        orbitColor: 0xDAA520, // Goldenrod for Jupiter
         info: "القطر: 139,820 كيلومتر\nالكتلة: 1.898 × 10²⁷ كيلوغرام\nالمدار: 11.86 سنة\nدرجة حرارة السطح: -145°C\nعملاق غازي\nأكبر كواكب المجموعة الشمسية، يحتوي على البقعة الحمراء العظيمة، وله 79 قمرًا"
       }, {
         name: "زحل",
@@ -182,6 +187,7 @@
         tilt: 26.7,
         rotation: 0.09,
         texture: "saturn.jpg",
+        orbitColor: 0xF0E68C, // Khaki for Saturn
         info: "القطر: 116,460 كيلومتر\nالكتلة: 5.68 × 10²⁶ كيلوغرام\nالمدار: 29.46 سنة\nدرجة حرارة السطح: -184°C\nيتميز بحلقاته الشهيرة\nعملاق غازي، وله 83 قمرًا في مدارات مختلفة"
       }, {
         name: "أورانوس",
@@ -191,6 +197,7 @@
         tilt: 97.8,
         rotation: 0.06,
         texture: "uranus.jpg",
+        orbitColor: 0x7FFFD4, // Aquamarine for Uranus
         info: "القطر: 50,724 كيلومتر\nالكتلة: 8.68 × 10²⁵ كيلوغرام\nالمدار: 84 سنة\nدرجة حرارة السطح: -224°C\nعملاق جليدي\nيدور بشكل جانبي، يمتلك حلقات باهتة، وله 27 قمرًا"
       }, {
         name: "نبتون",
@@ -200,6 +207,7 @@
         tilt: 28.3,
         rotation: 0.07,
         texture: "neptune.jpg",
+        orbitColor: 0x4682B4, // Steel blue for Neptune
         info: "القطر: 49,244 كيلومتر\nالكتلة: 1.02 × 10²⁶ كيلوغرام\nالمدار: 164.8 سنة\nدرجة حرارة السطح: -201°C\nعملاق جليدي\nيتميز بلونه الأزرق العميق، يمتلك أقوى الرياح في المجموعة الشمسية، وله 14 قمرًا"
       }];
       // Planet Meshes and Circular Orbits
@@ -208,14 +216,14 @@
         const geometry = new THREE.SphereGeometry(planet.radius, 128, 128);
         const material = new THREE.MeshStandardMaterial({
           color: 0xffffff,
-          emissive: planet.name === "Sun" ? 0xffff00 : 0x000000,
-          emissiveIntensity: planet.name === "Sun" ? 2 : 0
+          emissive: planet.name === "الشمس" ? 0xffff00 : 0x000000,
+          emissiveIntensity: planet.name === "الشمس" ? 2 : 0
         });
         loader.load(`textures/${planet.texture}`,
           (texture) => {
             material.map = texture;
             // Special treatment for the Sun
-            if (planet.name === "Sun") {
+            if (planet.name === "الشمس") {
               material.emissive = new THREE.Color(0xffff00); // Bright yellow glow
               material.emissiveIntensity = 1.5; // Boost brightness
             }
@@ -226,12 +234,14 @@
         mesh.position.x = planet.distance;
         mesh.rotation.x = planet.tilt * Math.PI / 180;
         scene.add(mesh);
-        // Circular Orbit Path
+        // Circular Orbit Path with color
         if (planet.distance > 0) {
           const orbitGeometry = new THREE.RingGeometry(planet.distance - 0.05, planet.distance + 0.05, 128);
           const orbitMaterial = new THREE.MeshBasicMaterial({
-            color: 0x333333,
-            side: THREE.DoubleSide
+            color: planet.orbitColor || 0x333333,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.5
           });
           const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
           orbit.rotation.x = Math.PI / 2;
