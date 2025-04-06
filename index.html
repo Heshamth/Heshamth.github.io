@@ -149,6 +149,10 @@
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       
+      // Track which planet is currently being followed
+      let currentFollowedPlanet = null;
+      let isFollowingPlanet = false;
+      
       // Advanced Lighting
       const sunLight = new THREE.PointLight(0xffffff, 1.5, 1000);
       sunLight.position.set(0, 0, 0);
@@ -429,6 +433,11 @@
             const planet = intersects[0].object;
             const data = planetMeshes.find(p => p.mesh === planet).planet;
             showPlanetInfo(data);
+            // Start following this planet
+            startFollowingPlanet(data);
+          } else {
+            // If clicked on empty space, stop following
+            stopFollowingPlanet();
           }
         }
       });
@@ -442,53 +451,43 @@
         planetName.textContent = planetData.name;
         planetInfo.innerHTML = planetData.info.replace(/\n/g, '<br>');
         infoPanel.style.display = 'block';
-        
-        // Focus camera on the planet
-        focusOnPlanet(planetData);
       }
       
-      // Function to focus camera on a planet
-      function focusOnPlanet(planetData) {
-        const planetMesh = planetMeshes.find(p => p.planet.name === planetData.name).mesh;
+      // Function to start following a planet
+      function startFollowingPlanet(planetData) {
+        currentFollowedPlanet = planetData;
+        isFollowingPlanet = true;
+      }
+      
+      // Function to stop following a planet
+      function stopFollowingPlanet() {
+        isFollowingPlanet = false;
+        currentFollowedPlanet = null;
+      }
+      
+      // Function to update camera position to follow the planet
+      function updateCameraForFollowedPlanet() {
+        if (!isFollowingPlanet || !currentFollowedPlanet) return;
+        
+        const planetMesh = planetMeshes.find(p => p.planet.name === currentFollowedPlanet.name).mesh;
         const targetPosition = planetMesh.position.clone();
         
         // For the Sun, we want to look at the center
-        if (planetData.name === "الشمس") {
+        if (currentFollowedPlanet.name === "الشمس") {
           targetPosition.set(0, 0, 0);
         }
         
         // Calculate camera position based on focusDistance
-        const cameraDistance = planetData.focusDistance;
+        const cameraDistance = currentFollowedPlanet.focusDistance;
         const cameraPosition = new THREE.Vector3(
           targetPosition.x,
           targetPosition.y + cameraDistance * 0.3, // Slightly above
           targetPosition.z + cameraDistance
         );
         
-        // Animate camera movement
-        const duration = 1000; // 1 second
-        const startTime = Date.now();
-        const startPosition = camera.position.clone();
-        const startTarget = controls.target.clone();
-        
-        function animateCamera() {
-          const elapsed = Date.now() - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          
-          // Ease in-out function
-          const easeProgress = progress < 0.5 
-            ? 2 * progress * progress 
-            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-          
-          camera.position.lerpVectors(startPosition, cameraPosition, easeProgress);
-          controls.target.lerpVectors(startTarget, targetPosition, easeProgress);
-          
-          if (progress < 1) {
-            requestAnimationFrame(animateCamera);
-          }
-        }
-        
-        animateCamera();
+        // Smoothly move the camera to follow the planet
+        camera.position.lerp(cameraPosition, 0.05);
+        controls.target.lerp(targetPosition, 0.05);
       }
       
       // Create planets dropdown menu
@@ -500,6 +499,7 @@
         link.addEventListener('click', (e) => {
           e.preventDefault();
           showPlanetInfo(planet);
+          startFollowingPlanet(planet);
           document.getElementById('planetsDropdown').classList.remove('show');
         });
         planetsDropdown.appendChild(link);
@@ -519,6 +519,8 @@
       // Animation Loop with Circular Orbits
       function animate() {
         requestAnimationFrame(animate);
+        
+        // Update planet positions
         planetMeshes.forEach((planet) => {
           const { mesh, planet: data } = planet;
           if (data.distance > 0) {
@@ -528,6 +530,9 @@
           }
           mesh.rotation.y += data.rotation;
         });
+        
+        // Update camera to follow the selected planet
+        updateCameraForFollowedPlanet();
         
         // Comet Animation
         const cometAngle = Date.now() * 0.0005;
