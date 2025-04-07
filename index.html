@@ -570,6 +570,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
       // Zooming Variables
+// Zooming Variables
 let targetZoomDistance = null;
 let zoomSpeed = 2.0; // Scroll sensitivity
 let minZoom = 5;     // Minimum camera distance
@@ -583,9 +584,31 @@ window.addEventListener('wheel', (event) => {
     targetZoomDistance = THREE.MathUtils.clamp(currentDistance + delta * zoomSpeed, minZoom, maxZoom);
   }
 });
-isFollowingPlanet = true;
-currentFollowedPlanet = { mesh: clickedPlanetMesh, planet: planet };
-targetZoomDistance = planet.focusDistance;
+
+// Function to update camera position to follow the planet with adjustable zoom
+function updateCameraForFollowedPlanet() {
+  if (!isFollowingPlanet || !currentFollowedPlanet) return;
+
+  const planetMesh = planetMeshes.find(p => p.planet.name === currentFollowedPlanet.name).mesh;
+  const targetPosition = planetMesh.position.clone();
+
+  // For the Sun, we want to look at the center
+  if (currentFollowedPlanet.name === "الشمس") {
+    targetPosition.set(0, 0, 0);
+  }
+
+  // Calculate camera position based on focusDistance
+  const cameraDistance = targetZoomDistance !== null ? targetZoomDistance : currentFollowedPlanet.focusDistance;
+  const cameraPosition = new THREE.Vector3(
+    targetPosition.x,
+    targetPosition.y + cameraDistance * 0.2, // Slightly above
+    targetPosition.z + cameraDistance * 0.4
+  );
+
+  // Smoothly move the camera to follow the planet
+  camera.position.lerp(cameraPosition, 0.05);
+  controls.target.lerp(targetPosition, 0.05);
+}
 
     </script>
   </body>
