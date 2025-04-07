@@ -481,8 +481,8 @@
         const cameraDistance = currentFollowedPlanet.focusDistance;
         const cameraPosition = new THREE.Vector3(
           targetPosition.x,
-          targetPosition.y + cameraDistance * 0.3, // Slightly above
-          targetPosition.z + cameraDistance
+          targetPosition.y + cameraDistance * 0.5, // Slightly above
+          targetPosition.z + cameraDistance * 0.8
         );
         
         // Smoothly move the camera to follow the planet
