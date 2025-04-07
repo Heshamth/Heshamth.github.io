@@ -387,6 +387,7 @@ border-radius: 50%; /* Circular */
       ];
  // --- THREE.js Setup ---
       const scene = new THREE.Scene();
+	const mesh = new THREE.Mesh(geometry, material);
  const camera = new THREE.PerspectiveCamera(
         75,
         window.innerWidth / window.innerHeight,
@@ -479,7 +480,7 @@ planetsData.forEach((planet) => {
   // Load initial low-res texture
         loadTexture(mesh, mesh.userData.texturePath, false); // Use the new function
 
-        const mesh = new THREE.Mesh(geometry, material);
+        
  mesh.position.x = planet.distance;
         mesh.rotation.x = (planet.tilt * Math.PI) / 180;
         mesh.userData.id = planet.id;
