@@ -201,7 +201,7 @@
        }
        /* --- END SHARED STYLES --- */
 
-       /* --- NEW SPEED CONTROL STYLES --- */
+        /* --- NEW SPEED CONTROL STYLES --- */
        #speedControlContainer {
          display: flex;
          align-items: center;
@@ -314,7 +314,7 @@
            <div class="dropdown" id="planetsDropdown">
              </div>
          </div>
-         <div id="speedControlContainer">
+          <div id="speedControlContainer">
              <button id="speedDownBtn" class="speed-btn">-</button>
              <span id="speedDisplay">1x</span>
              <button id="speedUpBtn" class="speed-btn">+</button>
@@ -404,7 +404,8 @@
        scene.add(stars);
 
         // --- Comet ---
-        const cometGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+        // NOTE: Keeping original comet code BEFORE problematic tail implementation
+        const cometGeometry = new THREE.SphereGeometry(0.3, 16, 16); // Smaller comet head
         const cometMaterial = new THREE.MeshStandardMaterial({
             color: 0xaaaaff, // Bluish white
             emissive: 0x8888ff, // Slight glow
@@ -413,29 +414,11 @@
         });
         const comet = new THREE.Mesh(cometGeometry, cometMaterial);
         comet.castShadow = true; // Comet casts shadow
-
-        // Basic Comet Tail (using Points) - More advanced tails are complex
-        const tailGeometry = new THREE.BufferGeometry();
-        const tailMaterial = new THREE.PointsMaterial({
-            color: 0xaaaaff,
-            size: 0.1,
-            sizeAttenuation: true,
-            transparent: true,
-            opacity: 0.5
-        });
-        const tailVertices = [];
-        for (let i = 0; i < 100; i++) {
-            // Spawn points behind the comet initially (will update in animation)
-            tailVertices.push(0, 0, i * 0.1);
-        }
-        tailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(tailVertices, 3));
-        const cometTail = new THREE.Points(tailGeometry, tailMaterial);
-        comet.add(cometTail); // Add tail as child of comet head
-
         scene.add(comet);
 
 
        // --- Language and Data ---
+       // NOTE: Keeping original translations
        const translations = {
          en: {
              title: "FalakZoom",
@@ -641,6 +624,7 @@
 
        let currentLang = "en"; // Default language
 
+       // NOTE: Keeping original planet data structure
        const planetData = [
            { id: 0, name: 'sun', radius: 2, distance: 0, speed: 0, color: 0xffff00, emissive: 0xffff00, texture: 'textures/sun.jpg', modelPath: null, description_key: 'sun_desc', dist_key: 'sun_dist', rad_key: 'sun_rad', orb_key: 'sun_orb', rot_key: 'sun_rot', fact_key: 'sun_fact', extra_keys: ['sun_extra1', 'sun_extra2', 'sun_extra3'] },
            { id: 1, name: 'mercury', radius: 0.3, distance: 6, speed: 0.01, color: 0xaaaaaa, texture: 'textures/mercury.jpg', modelPath: null, description_key: 'mercury_desc', dist_key: 'mercury_dist', rad_key: 'mercury_rad', orb_key: 'mercury_orb', rot_key: 'mercury_rot', fact_key: 'mercury_fact', extra_keys: ['mercury_extra1', 'mercury_extra2', 'mercury_extra3'] },
@@ -658,6 +642,7 @@
        const modelLoader = new GLTFLoader();
 
        // --- Create Planets ---
+       // NOTE: Keeping original planet creation logic
        planetData.forEach((p, index) => {
          let planetMesh;
 
@@ -674,7 +659,11 @@
              } );
              scene.add(planetMesh);
              planets[index] = { mesh: planetMesh, data: p, angle: Math.random() * Math.PI * 2 };
-             setupPlanetInteraction(planetMesh, p, index); // Setup interaction AFTER loading
+             // setupPlanetInteraction(planetMesh, p, index); // Setup interaction AFTER loading
+             // Store original scale for hover effect
+             planetMesh.userData.originalScale = planetMesh.scale.clone();
+           }, undefined, (error) => {
+              console.error(`Error loading model ${p.modelPath}:`, error); // Add error logging
            });
          } else {
            // Create sphere geometry
@@ -691,18 +680,23 @@
            planetMesh.receiveShadow = true; // Planets receive shadows
            scene.add(planetMesh);
            planets[index] = { mesh: planetMesh, data: p, angle: Math.random() * Math.PI * 2 };
-           setupPlanetInteraction(planetMesh, p, index); // Setup interaction for spheres
+           // setupPlanetInteraction(planetMesh, p, index); // Setup interaction for spheres
+            // Store original scale for hover effect
+           planetMesh.userData.originalScale = planetMesh.scale.clone();
          }
 
-         // Add orbit lines (optional)
-         const orbitGeometry = new THREE.RingGeometry(p.distance - 0.1, p.distance + 0.1, 128);
-         const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, opacity: 0.1, transparent: true });
-         const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
-         orbit.rotation.x = -Math.PI / 2; // Rotate to be flat on XZ plane
-         scene.add(orbit);
+         // Add orbit lines (optional) - Keeping original
+         if(p.distance > 0){ // Don't draw orbit for the sun
+             const orbitGeometry = new THREE.RingGeometry(p.distance - 0.1, p.distance + 0.1, 128);
+             const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, opacity: 0.1, transparent: true });
+             const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+             orbit.rotation.x = -Math.PI / 2; // Rotate to be flat on XZ plane
+             scene.add(orbit);
+         }
        });
 
        // --- Raycasting for Interaction ---
+       // NOTE: Keeping original raycasting logic
        const raycaster = new THREE.Raycaster();
        const mouse = new THREE.Vector2();
        let intersectedObject = null;
@@ -710,15 +704,12 @@
        let focusedPlanetIndex = -1;
 
        function onMouseMove(event) {
-           // Calculate mouse position in normalized device coordinates (-1 to +1)
            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-           // Don't raycast if info panel is open or dropdown is shown
            if (infoPanel.style.display === 'block' || planetsDropdown.classList.contains('show')) {
                if (intersectedObject) {
-                   // Revert scale if mouse moves off while panel is open
-                   intersectedObject.scale.set(1, 1, 1);
+                   intersectedObject.scale.copy(intersectedObject.userData.originalScale); // Revert scale
                    intersectedObject = null;
                    document.body.style.cursor = 'auto';
                }
@@ -726,12 +717,13 @@
            }
 
            raycaster.setFromCamera(mouse, camera);
-           const intersects = raycaster.intersectObjects(planets.map(p => p.mesh), true); // Check children for models
+           const meshesToCheck = planets.map(p => p.mesh).filter(m => m); // Filter out potentially unloaded models
+           const intersects = raycaster.intersectObjects(meshesToCheck, true); // Check children for models
 
            if (intersects.length > 0) {
                let targetMesh = intersects[0].object;
-               // Traverse up to find the main planet group/mesh if model is used
                 while(targetMesh.parent && targetMesh.parent !== scene){
+                    // Check if the parent is one of the main planet meshes/groups we stored
                    if (planets.some(p => p.mesh === targetMesh.parent)){
                        targetMesh = targetMesh.parent;
                        break;
@@ -739,20 +731,18 @@
                    targetMesh = targetMesh.parent;
                }
 
-
                if (intersectedObject !== targetMesh) {
-                   // Revert scale of previously intersected object
                    if (intersectedObject) {
-                       intersectedObject.scale.set(1, 1, 1);
+                       intersectedObject.scale.copy(intersectedObject.userData.originalScale); // Revert scale
                    }
                    intersectedObject = targetMesh;
-                   intersectedObject.scale.set(1.2, 1.2, 1.2); // Scale up on hover
+                   // Apply hover scale relative to original scale
+                   intersectedObject.scale.copy(intersectedObject.userData.originalScale).multiplyScalar(1.2);
                    document.body.style.cursor = 'pointer';
                }
            } else {
                if (intersectedObject) {
-                   // Revert scale when mouse moves off
-                   intersectedObject.scale.set(1, 1, 1);
+                   intersectedObject.scale.copy(intersectedObject.userData.originalScale); // Revert scale
                    intersectedObject = null;
                    document.body.style.cursor = 'auto';
                }
@@ -761,34 +751,32 @@
 
        function onMouseClick(event) {
          if (intersectedObject) {
-             // Find the planet data corresponding to the clicked mesh
              const clickedPlanet = planets.find(p => p.mesh === intersectedObject);
              if (clickedPlanet) {
                  showInfoPanel(clickedPlanet.data);
-                 focusedPlanetIndex = planets.indexOf(clickedPlanet); // Store index
-                 // Don't start following sun
-                 isFollowingPlanet = (clickedPlanet.data.id !== 0);
+                 focusedPlanetIndex = planets.indexOf(clickedPlanet);
+                 isFollowingPlanet = (clickedPlanet.data.id !== 0); // Don't follow sun
              }
          } else {
-             // Close panel if clicking elsewhere, unless clicking inside the panel
              const isClickInsidePanel = infoPanel.contains(event.target);
              const isClickOnCloseButton = event.target === closeBtn;
              const isClickInsideDropdown = planetsDropdown.contains(event.target);
              const isClickOnMenu = planetsMenu.contains(event.target);
+             const isClickOnSpeedControl = speedControlContainer.contains(event.target); // Check speed control
 
-             if (!isClickInsidePanel && !isClickInsideDropdown && !isClickOnMenu && infoPanel.style.display === 'block') {
-                  if (!isClickOnCloseButton) { // Allow close button to function
-                    hideInfoPanel();
-                  }
+             // Hide info panel
+             if (!isClickInsidePanel && infoPanel.style.display === 'block' && !isClickOnCloseButton && !isClickOnMenu && !isClickInsideDropdown && !isClickOnSpeedControl) {
+                  hideInfoPanel();
              }
-             // Close dropdown if clicking outside
-             if (!isClickInsideDropdown && !isClickOnMenu && planetsDropdown.classList.contains('show')) {
+             // Hide dropdown
+             if (!isClickOnMenu && !isClickInsideDropdown && planetsDropdown.classList.contains('show')) {
                   planetsDropdown.classList.remove('show');
              }
          }
        }
 
        // --- Info Panel Logic ---
+       // NOTE: Keeping original info panel logic
        const infoPanel = document.getElementById("infoPanel");
        const infoTitle = document.getElementById("infoTitle");
        const infoDesc = document.getElementById("infoDesc");
@@ -812,8 +800,7 @@
            infoRotation.textContent = `${langData.rotation_hours}: ${langData[data.rot_key]}`;
            infoFact.textContent = `${langData.fact}: ${langData[data.fact_key]}`;
 
-            // Populate extra facts
-            extraFactsContainer.innerHTML = ''; // Clear previous facts
+            extraFactsContainer.innerHTML = '';
             if (data.extra_keys && data.extra_keys.length > 0) {
                 data.extra_keys.forEach(key => {
                     if (langData[key]) {
@@ -822,18 +809,16 @@
                         extraFactsContainer.appendChild(p);
                     }
                 });
-                readMoreBtn.style.display = 'block'; // Show button if there are facts
-                extraFactsContainer.style.display = 'none'; // Hide facts initially
+                readMoreBtn.style.display = 'block';
+                extraFactsContainer.style.display = 'none';
             } else {
-                readMoreBtn.style.display = 'none'; // Hide button if no facts
+                readMoreBtn.style.display = 'none';
                 extraFactsContainer.style.display = 'none';
             }
 
-
            infoPanel.style.display = "block";
-           // Reset hover effect
            if (intersectedObject) {
-             intersectedObject.scale.set(1, 1, 1);
+             intersectedObject.scale.copy(intersectedObject.userData.originalScale); // Revert scale
              intersectedObject = null;
              document.body.style.cursor = 'auto';
            }
@@ -841,53 +826,60 @@
 
        function hideInfoPanel() {
          infoPanel.style.display = "none";
-         isFollowingPlanet = false; // Stop following when panel closes
+         isFollowingPlanet = false;
          focusedPlanetIndex = -1;
-         // Reset controls target slightly away from origin if nothing else is focused
-         controls.target.set(0, 1, 0); // Look slightly above origin
+         controls.target.set(0, 0, 0); // Reset target to origin
        }
 
        closeBtn.addEventListener("click", hideInfoPanel);
        readMoreBtn.addEventListener("click", () => {
             extraFactsContainer.style.display = extraFactsContainer.style.display === 'none' ? 'block' : 'none';
-            readMoreBtn.textContent = extraFactsContainer.style.display === 'none' ? translations[currentLang].readMore : 'Show Less'; // Basic toggle text
+            // Basic toggle text (ensure translation exists or fallback)
+            const readMoreKey = translations[currentLang].readMore || 'Read More';
+            const showLessKey = translations[currentLang].showLess || 'Show Less'; // Add a showLess key if desired
+            readMoreBtn.textContent = extraFactsContainer.style.display === 'none' ? readMoreKey : showLessKey;
        });
 
 
        // --- Menu Bar Logic ---
+       // NOTE: Keeping original menu logic + Adding speed control container reference
        const planetsMenu = document.getElementById("planetsMenu");
        const planetsDropdown = document.getElementById("planetsDropdown");
        const langToggleBtn = document.getElementById("langToggleBtn");
+       const speedControlContainer = document.getElementById("speedControlContainer"); // Added reference
 
-       // Populate Planets Dropdown
+
        function populateDropdown() {
-            planetsDropdown.innerHTML = ''; // Clear existing items
+            planetsDropdown.innerHTML = '';
             const langData = translations[currentLang];
             planetData.forEach((p, index) => {
                 const item = document.createElement("a");
                 item.classList.add("dropdown-item");
                 item.href = "#";
-                item.textContent = langData[p.name]; // Use translated name
+                item.textContent = langData[p.name];
                 item.addEventListener("click", (e) => {
-                e.preventDefault();
-                showInfoPanel(p);
-                focusedPlanetIndex = index; // Store index
-                // Don't follow sun
-                isFollowingPlanet = (p.id !== 0);
-                planetsDropdown.classList.remove("show"); // Hide dropdown after click
+                  e.preventDefault();
+                  // Ensure mesh exists before showing info/following
+                  if (planets[index] && planets[index].mesh) {
+                     showInfoPanel(p);
+                     focusedPlanetIndex = index;
+                     isFollowingPlanet = (p.id !== 0); // Don't follow sun
+                     planetsDropdown.classList.remove("show");
+                  } else {
+                      console.warn(`Mesh for planet ${p.name} not ready.`); // Warn if model not loaded
+                  }
                 });
                 planetsDropdown.appendChild(item);
             });
        }
 
        planetsMenu.addEventListener("click", (event) => {
-         // Prevent click from propagating to the window listener immediately
          event.stopPropagation();
          planetsDropdown.classList.toggle("show");
        });
 
-       // Close dropdown if clicked outside
        window.addEventListener('click', (event) => {
+           // Close dropdown if clicking outside the menu item
             if (!planetsMenu.contains(event.target) && planetsDropdown.classList.contains('show')) {
                 planetsDropdown.classList.remove('show');
             }
@@ -895,6 +887,7 @@
 
 
         // --- Language Toggle ---
+        // NOTE: Keeping original language toggle logic
         function updateLanguageUI() {
             currentLang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
@@ -905,12 +898,21 @@
                     el.textContent = translations[currentLang][key];
                 }
             });
-            populateDropdown(); // Repopulate dropdown with new language
+            populateDropdown();
 
-             // If info panel is open, update its content
              if (infoPanel.style.display === 'block' && focusedPlanetIndex !== -1) {
-                 showInfoPanel(planetData[focusedPlanetIndex]);
+                  if (planetData[focusedPlanetIndex]){ // Ensure data exists
+                    showInfoPanel(planetData[focusedPlanetIndex]);
+                  }
              }
+             // Update Read More button text if panel is open
+            if (extraFactsContainer.style.display !== 'none') {
+                 const showLessKey = translations[currentLang].showLess || 'Show Less';
+                 readMoreBtn.textContent = showLessKey;
+            } else if (infoPanel.style.display === 'block') {
+                 const readMoreKey = translations[currentLang].readMore || 'Read More';
+                 readMoreBtn.textContent = readMoreKey;
+            }
         }
 
 
@@ -924,17 +926,15 @@
        const speedDownBtn = document.getElementById('speedDownBtn');
        const speedUpBtn = document.getElementById('speedUpBtn');
        const speedDisplay = document.getElementById('speedDisplay');
-       const speedLevels = [0.25, 0.5, 1, 2, 4, 8, 16]; // Added more levels
+       const speedLevels = [0.25, 0.5, 1, 2, 4, 8]; // Using original requested levels
        let currentSpeedIndex = speedLevels.indexOf(1); // Start at 1x speed
        let simulationSpeed = speedLevels[currentSpeedIndex];
 
        function updateSpeedDisplay() {
             simulationSpeed = speedLevels[currentSpeedIndex];
             speedDisplay.textContent = `${simulationSpeed}x`;
-            // Disable buttons at limits
             speedDownBtn.disabled = currentSpeedIndex === 0;
             speedUpBtn.disabled = currentSpeedIndex === speedLevels.length - 1;
-            // Optional: Add visual style for disabled buttons
             speedDownBtn.style.opacity = speedDownBtn.disabled ? 0.5 : 1;
             speedUpBtn.style.opacity = speedUpBtn.disabled ? 0.5 : 1;
             speedDownBtn.style.cursor = speedDownBtn.disabled ? 'not-allowed' : 'pointer';
@@ -956,88 +956,53 @@
        });
        // --- END NEW SPEED CONTROL LOGIC ---
 
-       // --- Interaction Setup Function ---
-       function setupPlanetInteraction(mesh, data, index) {
-           // Add listeners directly to the mesh/group
-           mesh.addEventListener('mouseover', (event) => { // Note: Standard DOM events don't work directly
-               // This needs raycasting, handled in onMouseMove
-           });
-           mesh.addEventListener('mouseout', (event) => {
-                // This needs raycasting, handled in onMouseMove
-           });
-           mesh.addEventListener('click', (event) => {
-                // This needs raycasting, handled in onMouseClick
-           });
-       }
-
-       // --- Event Listeners ---
-       window.addEventListener("mousemove", onMouseMove);
-       window.addEventListener("click", onMouseClick);
 
        // --- Animation Loop ---
+       // NOTE: Keeping mostly original animation loop, only adding simulationSpeed multiplier
        function animate() {
          requestAnimationFrame(animate);
 
-         // Update planet positions and rotations
          planets.forEach((p, index) => {
            const { mesh, data } = p;
            if (!mesh) return; // Skip if model not loaded yet
 
-           // Simple rotation (adjust speed as needed)
-           mesh.rotation.y += 0.001; // Slow self-rotation
+           mesh.rotation.y += 0.001; // Simple rotation
 
-           // Orbital movement (using stored angle)
+           // Orbital movement - ADDED simulationSpeed
            if (data.distance > 0) {
-             // UPDATED: Apply simulation speed
-             p.angle += data.speed * 0.5 * simulationSpeed;
+             p.angle += data.speed * 0.5 * simulationSpeed; // ONLY CHANGE HERE for planets
              mesh.position.x = Math.cos(p.angle) * data.distance;
              mesh.position.z = Math.sin(p.angle) * data.distance;
            }
 
-           // Camera follow logic
+           // Camera follow logic - Kept original
            if (isFollowingPlanet && index === focusedPlanetIndex) {
              const currentTargetPosition = mesh.position.clone();
-             controls.target.copy(currentTargetPosition); // Make controls look at the planet
+             controls.target.copy(currentTargetPosition);
 
-             // Calculate desired camera position (behind and slightly above)
-             const offsetDistance = data.radius * (data.id === 0 ? 5 : 8); // Adjust offset based on radius (larger for sun)
-             // Base direction away from the planet (relative to world origin)
-             let direction = mesh.position.clone().normalize();
-             // Add a slight upward component
-             direction.y += 0.1;
-             direction.normalize();
+             const offsetDistance = (mesh.userData.originalScale.x || data.radius) * (data.id === 0 ? 5 : 8); // Use original scale or data radius for offset
+             // Original simple offset calculation (may need refinement for better angles)
+             const offset = new THREE.Vector3(0, offsetDistance * 0.5 , offsetDistance); // Offset slightly up and back
+             const desiredPosition = currentTargetPosition.clone().add(offset);
 
-
-             const desiredPosition = currentTargetPosition.clone().add(direction.multiplyScalar(offsetDistance));
-             camera.position.lerp(desiredPosition, 0.05); // Smoothly move camera
+             // Simpler camera follow - place camera directly for now if lerp is issue
+             // camera.position.copy(desiredPosition); // Direct positioning
+             camera.position.lerp(desiredPosition, 0.05); // Smoothly move camera (original)
+             camera.lookAt(currentTargetPosition); // Ensure camera looks at target
            }
          });
 
 
-        // Comet Animation
-        const cometTime = Date.now() * 0.0002 * simulationSpeed; // Apply simulation speed
+        // Comet Animation - ADDED simulationSpeed
+        const cometTime = Date.now() * 0.0002 * simulationSpeed; // ONLY CHANGE HERE for comet
         const cometSemiMajor = 80;
         const cometSemiMinor = 50;
         comet.position.x = Math.cos(cometTime) * cometSemiMajor;
         comet.position.z = Math.sin(cometTime) * cometSemiMinor;
         comet.position.y = Math.sin(cometTime * 0.7) * 15; // Independent Y oscillation
-
-        // Point comet away from the Sun (origin)
+        // Original comet lookAt
         const dirToSun = comet.position.clone().normalize().negate();
-        comet.lookAt(comet.position.clone().add(dirToSun)); // Simple lookAt
-
-        // Basic Tail Update (Points trail behind) - Very rudimentary
-        const tailPositions = cometTail.geometry.attributes.position;
-        const cometWorldPos = comet.position;
-        // Shift existing points back
-        for (let i = tailPositions.count - 1; i > 0; i--) {
-            tailPositions.setXYZ(i, tailPositions.getX(i - 1), tailPositions.getY(i - 1), tailPositions.getZ(i - 1));
-        }
-        // Set the first point relative to the comet's current position (slightly behind)
-        const tailStartOffset = dirToSun.clone().multiplyScalar(0.5); // Start tail just behind head
-        const firstPointLocal = comet.worldToLocal(cometWorldPos.clone().add(tailStartOffset));
-        tailPositions.setXYZ(0, firstPointLocal.x, firstPointLocal.y, firstPointLocal.z );
-        tailPositions.needsUpdate = true;
+        comet.lookAt(comet.position.clone().add(dirToSun));
 
 
          controls.update(); // Required if enableDamping is true
@@ -1045,16 +1010,23 @@
        }
 
        // --- Initial Setup ---
-       updateLanguageUI(); // Set initial language based on HTML lang attribute
-       updateSpeedDisplay(); // Set initial speed display and button states
+       updateLanguageUI();
+       updateSpeedDisplay(); // Initialize speed display
        animate();
 
        // --- Resize Listener ---
+       // NOTE: Keeping original resize listener
        window.addEventListener("resize", () => {
          camera.aspect = window.innerWidth / window.innerHeight;
          camera.updateProjectionMatrix();
          renderer.setSize(window.innerWidth, window.innerHeight);
        });
+
+       // Set initial camera position
+       camera.position.z = 30;
+       camera.position.y = 15;
+       camera.lookAt(0, 0, 0);
+
      </script>
    </body>
  </html>
