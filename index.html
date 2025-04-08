@@ -443,7 +443,7 @@
       const planetsData = [
         {
           id: 0, name: { ar: "الشمس", en: "Sun" },
-          radius: 5, distance: 0, speed: 0, tilt: 0, rotation: 0.01, texture: "https://i.imgur.com/PFt3N4g.jpeg", // Example texture URL
+          radius: 5, distance: 0, speed: 0, tilt: 0, rotation: 0.01, texture: "sun.jpg", // Example texture URL
           info: {
             ar: "القطر: 1.391 مليون كيلومتر\nالكتلة: 1.989 × 10³⁰ كيلوغرام\nالعمر: 4.6 مليار سنة\nالنوع: نجم من النوع G\nدرجة حرارة النواة: 15 مليون درجة مئوية",
             en: "Diameter: 1.391 million km\nMass: 1.989 × 10³⁰ kg\nAge: 4.6 billion years\nType: G-type main-sequence star\nCore Temperature: 15 million °C",
@@ -460,7 +460,7 @@
         },
         {
           id: 1, name: { ar: "عطارد", en: "Mercury" },
-          radius: 0.5, distance: 10, speed: 0.0125, tilt: 0.034, rotation: 0.003, texture: "https://i.imgur.com/tXUuJ7T.jpeg", // Example texture URL
+          radius: 0.5, distance: 10, speed: 0.0125, tilt: 0.034, rotation: 0.003, texture: "mercury.jpg", // Example texture URL
           info: {
             ar: "القطر: 4,879 كيلومتر\nالكتلة: 3.3 × 10²³ كيلوغرام\nالمدار: 88 يومًا\nدرجة حرارة السطح: من -173°م إلى 427°م\nلا يوجد غلاف جوي تقريبًا",
             en: "Diameter: 4,879 km\nMass: 3.3 × 10²³ kg\nOrbit: 88 days\nSurface Temp: -173°C to 427°C\nAlmost no atmosphere",
@@ -477,7 +477,7 @@
         },
         {
           id: 2, name: { ar: "الزهرة", en: "Venus" },
-          radius: 0.8, distance: 15, speed: 0.004375, tilt: 177.4, rotation: 0.0004, texture: "https://i.imgur.com/8kGgY4L.jpeg", // Example texture URL
+          radius: 0.8, distance: 15, speed: 0.004375, tilt: 177.4, rotation: 0.0004, texture: "venus.jpg", // Example texture URL
           info: {
             ar: "القطر: 12,104 كيلومتر\nالكتلة: 4.87 × 10²⁴ كيلوغرام\nالمدار: 225 يومًا\nدرجة حرارة السطح: 464°م\nغلاف جوي كثيف من ثاني أكسيد الكربون",
             en: "Diameter: 12,104 km\nMass: 4.87 × 10²⁴ kg\nOrbit: 225 days\nSurface Temp: 464°C\nThick CO2 atmosphere",
@@ -494,7 +494,7 @@
         },
         {
            id: 3, name: { ar: "الأرض", en: "Earth" },
-           radius: 1, distance: 20, speed: 0.003125, tilt: 23.5, rotation: 0.05, texture: "https://i.imgur.com/mQ7XG0Q.jpeg", // Example texture URL
+           radius: 1, distance: 20, speed: 0.003125, tilt: 23.5, rotation: 0.05, texture: "earth.jpg", // Example texture URL
            info: {
              ar: "القطر: 12,742 كيلومتر\nالكتلة: 5.97 × 10²⁴ كيلوغرام\nالمدار: 365.25 يومًا\nدرجة حرارة السطح: من -88°م إلى 58°م\nمغطاة بنسبة 71% بالمياه",
              en: "Diameter: 12,742 km\nMass: 5.97 × 10²⁴ kg\nOrbit: 365.25 days\nSurface Temp: -88°C to 58°C\n71% covered by water",
@@ -511,7 +511,7 @@
         },
         {
            id: 4, name: { ar: "المريخ", en: "Mars" },
-           radius: 0.7, distance: 25, speed: 0.0025, tilt: 25.2, rotation: 0.048, texture: "https://i.imgur.com/0eQ8aQJ.jpeg", // Example texture URL
+           radius: 0.7, distance: 25, speed: 0.0025, tilt: 25.2, rotation: 0.048, texture: "mars.jpg", // Example texture URL
            info: {
              ar: "القطر: 6,792 كيلومتر\nالكتلة: 6.42 × 10²³ كيلوغرام\nالمدار: 687 يومًا\nدرجة حرارة السطح: من -153°م إلى 20°م\nغلاف جوي رقيق من ثاني أكسيد الكربون",
              en: "Diameter: 6,792 km\nMass: 6.42 × 10²³ kg\nOrbit: 687 days\nSurface Temp: -153°C to 20°C\nThin CO2 atmosphere",
@@ -528,7 +528,7 @@
         },
         {
            id: 5, name: { ar: "المشتري", en: "Jupiter" },
-           radius: 2.5, distance: 35, speed: 0.00125, tilt: 3.1, rotation: 0.1, texture: "https://i.imgur.com/5iW3pG9.jpeg", // Example texture URL
+           radius: 2.5, distance: 35, speed: 0.00125, tilt: 3.1, rotation: 0.1, texture: "jupiter.jpg", // Example texture URL
            info: {
              ar: "القطر: 139,820 كيلومتر\nالكتلة: 1.898 × 10²⁷ كيلوغرام\nالمدار: 11.86 سنة\nدرجة حرارة السطح (قمم السحب): -145°م\nعملاق غازي",
              en: "Diameter: 139,820 km\nMass: 1.898 × 10²⁷ kg\nOrbit: 11.86 years\nCloud Top Temp: -145°C\nGas giant",
@@ -546,21 +546,21 @@
         // --- Add Saturn, Uranus, Neptune similarly ---
         {
            id: 6, name: { ar: "زحل", en: "Saturn" },
-           radius: 2.2, distance: 45, speed: 0.0008125, tilt: 26.7, rotation: 0.09, texture: "https://i.imgur.com/N9z4zGe.jpeg", // Example texture URL
+           radius: 2.2, distance: 45, speed: 0.0008125, tilt: 26.7, rotation: 0.09, texture: "saturn.jpg", // Example texture URL
            info: { ar: "القطر: 116,460 كم...", en: "Diameter: 116,460 km..." },
            fact: { ar: "يشتهر زحل بنظامه الحلقي المذهل...", en: "Saturn is famous for its stunning ring system..." },
            extraFacts: [{ar: "...", en:"..."}]
         },
         {
            id: 7, name: { ar: "أورانوس", en: "Uranus" },
-           radius: 1.8, distance: 55, speed: 0.000625, tilt: 97.8, rotation: 0.07, texture: "https://i.imgur.com/1bXzJ9H.jpeg", // Example texture URL
+           radius: 1.8, distance: 55, speed: 0.000625, tilt: 97.8, rotation: 0.07, texture: "uranus.jpg", // Example texture URL
            info: { ar: "القطر: 50,724 كم...", en: "Diameter: 50,724 km..." },
            fact: { ar: "يدور أورانوس على جانبه...", en: "Uranus rotates on its side..." },
            extraFacts: [{ar: "...", en:"..."}]
         },
         {
            id: 8, name: { ar: "نبتون", en: "Neptune" },
-           radius: 1.7, distance: 65, speed: 0.0005, tilt: 28.3, rotation: 0.065, texture: "https://i.imgur.com/4u5t1Pz.jpeg", // Example texture URL
+           radius: 1.7, distance: 65, speed: 0.0005, tilt: 28.3, rotation: 0.065, texture: "neptune.jpg", // Example texture URL
            info: { ar: "القطر: 49,244 كم...", en: "Diameter: 49,244 km..." },
            fact: { ar: "نبتون هو أبعد كوكب عن الشمس...", en: "Neptune is the farthest planet from the Sun..." },
            extraFacts: [{ar: "...", en:"..."}]
